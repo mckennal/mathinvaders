@@ -49,10 +49,10 @@ class QuestionGenerator {
         () => QuestionGenerator.missingNumber(2, 12),
       ],
       5: [
-        () => QuestionGenerator.decimalAddition(0.1, 9.9),
-        () => QuestionGenerator.decimalSubtraction(0.1, 9.9),
-        () => QuestionGenerator.fractionOf(1, 12),
-        () => QuestionGenerator.roundDecimal(1, 9.9),
+        () => QuestionGenerator.multiplication(6, 12),
+        () => QuestionGenerator.division(2, 12),
+        () => QuestionGenerator.addition(100, 999),
+        () => QuestionGenerator.subtraction(100, 999),
       ],
       6: [
         () => QuestionGenerator.percentageOf(10, 80),
