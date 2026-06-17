@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#091624" />
+  <meta name="description" content="Answer the falling questions before they hit the bottom!" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Math Invaders" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23091624' width='192' height='192'/><text x='96' y='120' font-size='80' font-weight='bold' text-anchor='middle' fill='%2350d8ff' font-family='Arial'>∑</text></svg>" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23091624' width='180' height='180'/><text x='90' y='130' font-size='90' font-weight='bold' text-anchor='middle' fill='%2350d8ff' font-family='Arial'>∑</text></svg>" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Math Invaders</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>Math Invaders</h1>
+      <p class="tagline">Answer the falling questions before they hit the bottom!</p>
+    </header>
+
+    <main class="screen" id="auth-screen">
+      <div class="panel">
+        <h2>Enter game password</h2>
+        <label for="auth-password">Password</label>
+        <input id="auth-password" type="password" autocomplete="current-password" />
+        <button id="auth-button">Unlock</button>
+        <p id="auth-error" class="error-text hidden">That password is incorrect. Try again.</p>
+      </div>
+    </main>
+
+    <main class="screen hidden" id="menu-screen">
+      <div class="panel">
+        <button id="play-button">Play</button>
+        <button id="select-year-button">Select Year Level</button>
+        <button id="stats-button">Statistics</button>
+        <button id="settings-button">Settings</button>
+      </div>
+      <div class="footer-info">
+        <div>Selected year: <span id="menu-year-label">Year 3</span></div>
+        <div>High score: <span id="menu-high-score">0</span></div>
+      </div>
+    </main>
+
+    <main class="screen hidden" id="year-screen">
+      <div class="panel">
+        <h2>Select Year Level</h2>
+        <div class="year-grid">
+          <button class="year-button" data-year="2">Year 2</button>
+          <button class="year-button" data-year="3">Year 3</button>
+          <button class="year-button" data-year="4">Year 4</button>
+          <button class="year-button" data-year="5">Year 5</button>
+          <button class="year-button" data-year="6">Year 6</button>
+        </div>
+        <button id="year-back-button" class="secondary">Back</button>
+      </div>
+    </main>
+
+    <main class="screen hidden" id="stats-screen">
+      <div class="panel">
+        <h2>Statistics</h2>
+        <div class="stat-card">
+          <div>High score</div>
+          <strong id="stats-high-score">0</strong>
+        </div>
+        <div class="stat-card">
+          <div>Accuracy</div>
+          <strong id="stats-accuracy">0%</strong>
+        </div>
+        <div class="stat-card">
+          <div>Best combo</div>
+          <strong id="stats-best-combo">0</strong>
+        </div>
+        <button id="stats-back-button" class="secondary">Back</button>
+      </div>
+    </main>
+
+    <main class="screen hidden" id="settings-screen">
+      <div class="panel">
+        <h2>Settings</h2>
+        <label>
+          Wrong answers before game over
+          <input id="settings-max-wrong" type="number" min="1" max="10" />
+        </label>
+        <label>
+          Spawn interval (ms)
+          <input id="settings-spawn-interval" type="number" min="500" max="3000" />
+        </label>
+        <label>
+          Fall speed multiplier
+          <input id="settings-speed-multiplier" type="number" step="0.1" min="0.3" max="3" />
+        </label>
+        <button id="settings-save-button">Save</button>
+        <button id="settings-back-button" class="secondary">Back</button>
+      </div>
+    </main>
+
+    <main class="screen hidden" id="game-screen">
+      <div class="game-topbar">
+        <div class="hud-item">Year <span id="hud-year">2</span></div>
+        <div class="hud-item">Score <span id="hud-score">0</span></div>
+        <div class="hud-item">Combo <span id="hud-combo">0</span></div>
+        <div class="hud-item">Wrong left <span id="hud-wrong-left">3</span></div>
+        <div class="hud-item">Accuracy <span id="hud-accuracy">100%</span></div>
+      </div>
+      <div class="game-area">
+        <canvas id="game-canvas" width="760" height="500"></canvas>
+        <div class="game-controls">
+          <button id="quit-button" class="secondary">Quit</button>
+        </div>
+      </div>
+      <div class="choice-panel" id="choice-panel"></div>
+    </main>
+
+    <main class="screen hidden" id="gameover-screen">
+      <div class="panel">
+        <h2>Game Over</h2>
+        <div class="result-grid">
+          <div>Final score</div><strong id="final-score">0</strong>
+          <div>Accuracy</div><strong id="final-accuracy">0%</strong>
+          <div>Longest combo</div><strong id="final-combo">0</strong>
+          <div>Questions answered</div><strong id="final-answered">0</strong>
+          <div>High score</div><strong id="final-high-score">0</strong>
+        </div>
+        <button id="restart-button">Play Again</button>
+        <button id="gameover-back-button" class="secondary">Main Menu</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="settings.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+        console.warn('Service worker registration failed:', error);
+      });
+    }
+  </script>
+</body>
+</html>

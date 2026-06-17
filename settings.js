@@ -1,0 +1,16 @@
+window.GameSettings = {
+  maxWrongAnswers: 3,
+  baseSpawnInterval: 1200,
+  minSpawnInterval: 500,
+  fallSpeedMultiplier: 1.2,
+  questionSpeedBase: 32,
+  minQuestionCount: 2,
+  maxQuestionCount: 4,
+  pointsPerCorrect: 10,
+  fastAnswerBonus: 5,
+  comboBonus: 2,
+  highlightPadding: 14,
+  laserDuration: 220,
+  laserColor: '#7af2ff',
+  localStorageKey: 'math-invaders-high-score',
+};

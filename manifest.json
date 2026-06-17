@@ -1,0 +1,40 @@
+{
+  "name": "Math Invaders",
+  "short_name": "Math Invaders",
+  "description": "Answer the falling questions before they hit the bottom!",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#091624",
+  "background_color": "#0a1e2e",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23091624' width='192' height='192'/><text x='96' y='120' font-size='80' font-weight='bold' text-anchor='middle' fill='%2350d8ff' font-family='Arial'>∑</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23091624' width='512' height='512'/><text x='256' y='350' font-size='200' font-weight='bold' text-anchor='middle' fill='%2350d8ff' font-family='Arial'>∑</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23091624' width='180' height='180'/><text x='90' y='130' font-size='90' font-weight='bold' text-anchor='middle' fill='%2350d8ff' font-family='Arial'>∑</text></svg>",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["education", "games"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230a1e2e' width='540' height='720'/><rect fill='%23091624' width='540' height='60'/><text x='20' y='40' font-size='20' fill='%2350d8ff' font-family='Arial'>Math Invaders</text><circle cx='270' cy='360' r='100' fill='rgba(80,216,255,0.2)' stroke='rgba(80,216,255,0.95)' stroke-width='4'/><text x='270' y='370' font-size='36' text-anchor='middle' fill='%23e9fbff' font-family='Arial'>6 + 21</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}
