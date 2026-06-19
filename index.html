@@ -134,9 +134,14 @@
   <script src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js').catch((error) => {
-        console.warn('Service worker registration failed:', error);
-      });
+      const allowedHost = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      if (allowedHost) {
+        navigator.serviceWorker.register('service-worker.js').catch((error) => {
+          console.warn('Service worker registration failed:', error);
+        });
+      } else {
+        console.warn('Service workers require HTTPS or localhost. Skipping registration on', location.protocol);
+      }
     }
   </script>
 </body>

@@ -97,7 +97,7 @@ class QuestionGenerator {
   static division(min, max) {
     const b = QuestionGenerator.randomInt(min, max);
     const a = QuestionGenerator.randomInt(min, max) * b;
-    return { text: `${a} ÷ ${b}`, answer: String(a / b) };
+    return { text: `${a} ÷ ${b}`, answer: QuestionGenerator.formatAnswer(a / b, 2) };
   }
 
   static decimalAddition(min, max) {
@@ -122,14 +122,14 @@ class QuestionGenerator {
 
   static roundDecimal(min, max) {
     const value = QuestionGenerator.roundDecimalValue(QuestionGenerator.randFloat(min, max));
-    return { text: `Round ${value} to 1 decimal place`, answer: QuestionGenerator.roundDecimalValue(value) };
+    return { text: `Round ${value} to 1 decimal place`, answer: QuestionGenerator.formatAnswer(value, 1) };
   }
 
   static percentageOf(minPct, maxPct) {
     const pct = QuestionGenerator.randomInt(minPct, maxPct);
     const value = QuestionGenerator.randomInt(10, 150);
     const result = (pct / 100) * value;
-    return { text: `${pct}% of ${value}`, answer: QuestionGenerator.normalizeDecimal(result) };
+    return { text: `${pct}% of ${value}`, answer: QuestionGenerator.formatAnswer(result, 2) };
   }
 
   static ratioSimplify() {
@@ -143,7 +143,7 @@ class QuestionGenerator {
     const a = QuestionGenerator.randomInt(1, 4);
     const b = QuestionGenerator.randomInt(1, 4);
     const result = (a + b) / 4;
-    return { text: `${a}/4 + ${b}/4`, answer: QuestionGenerator.normalizeDecimal(result) };
+    return { text: `${a}/4 + ${b}/4`, answer: QuestionGenerator.formatAnswer(result, 2) };
   }
 
   static orderOfOperations() {
@@ -167,7 +167,17 @@ class QuestionGenerator {
   }
 
   static normalizeDecimal(value) {
-    return Number(value.toFixed(1));
+    return QuestionGenerator.formatAnswer(value, 2);
+  }
+
+  static formatAnswer(value, digits = 2) {
+    const numeric = Number(value);
+    if (Number.isNaN(numeric)) {
+      return String(value);
+    }
+    const rounded = Number(numeric.toFixed(digits));
+    const formatted = rounded.toFixed(digits);
+    return formatted.replace(/\.?(?:0+)$/, '');
   }
 
   static gcd(a, b) {
@@ -212,20 +222,21 @@ class Game {
   }
 
   spawnInitialQuestions() {
-    const lanes = [30, 215, 400, 585];
     const count = Math.min(GameSettings.minQuestionCount, GameSettings.maxQuestionCount);
     for (let i = 0; i < count; i += 1) {
-      this.spawnQuestion(lanes[i]);
+      this.spawnQuestion();
     }
   }
 
-  spawnQuestion(preferredX) {
+  spawnQuestion() {
     if (this.questions.length >= GameSettings.maxQuestionCount) {
       return;
     }
     const questionData = this.generator.generate(this.activeYear);
-    const lanePositions = [30, 220, 410, 600];
-    const requiredGap = 110;
+    const laneFractions = [0.12, 0.38, 0.64, 0.90];
+    const canvasWidth = this.ui.canvasWidth || this.ui.canvas.clientWidth;
+    const lanePositions = laneFractions.map((fraction) => Math.round(canvasWidth * fraction));
+    const requiredGap = Math.round(110 * (this.ui.canvasScale || 1));
 
     const laneCandidates = lanePositions.map((position, laneIndex) => {
       const laneQuestions = this.questions.filter((q) => q.lane === laneIndex);
@@ -241,22 +252,21 @@ class Game {
       return;
     }
 
-    let selectedLane;
-    if (preferredX !== undefined) {
-      const preferredIndex = lanePositions.indexOf(preferredX);
-      selectedLane = openLanes.find((lane) => lane.laneIndex === preferredIndex);
-    }
-    if (!selectedLane) {
-      selectedLane = openLanes[Math.floor(Math.random() * openLanes.length)];
-    }
-
-    const width = Math.round(this.ui.ctx.measureText(questionData.text).width + GameSettings.highlightPadding * 2 + 14);
-    const x = Math.max(10, Math.min(selectedLane.position, this.ui.canvas.width - width - 10));
+    const selectedLane = openLanes[Math.floor(Math.random() * openLanes.length)];
+    const fontSize = Math.max(18, Math.round(32 * (this.ui.canvasScale || 1)));
+    this.ui.ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+    const padding = Math.round(GameSettings.highlightPadding * (this.ui.canvasScale || 1));
+    const width = Math.round(this.ui.ctx.measureText(questionData.text).width + padding * 2 + 14);
+    const x = Math.max(Math.round(10 * (this.ui.canvasScale || 1)), Math.min(selectedLane.position, canvasWidth - width - Math.round(10 * (this.ui.canvasScale || 1))));
     const speed = (GameSettings.questionSpeedBase + this.score * 0.3) * GameSettings.fallSpeedMultiplier;
     const q = new Question(questionData.text, String(questionData.answer), x, speed / 1000);
     q.width = width;
+    q.height = Math.max(72, Math.round(96 * (this.ui.canvasScale || 1)));
     q.lane = selectedLane.laneIndex;
-    q.y = 20;
+    q.y = Math.round(20 * (this.ui.canvasScale || 1));
+    if (!this.canPlaceQuestion(q)) {
+      return;
+    }
     this.questions.push(q);
   }
 
@@ -398,11 +408,27 @@ class Game {
     return array;
   }
 
+  canPlaceQuestion(candidate) {
+    return !this.questions.some((question) => {
+      const leftA = candidate.x;
+      const rightA = candidate.x + candidate.width;
+      const topA = candidate.y;
+      const bottomA = candidate.y + candidate.height;
+      const leftB = question.x;
+      const rightB = question.x + question.width;
+      const topB = question.y;
+      const bottomB = question.y + question.height;
+      const horizontalOverlap = leftA < rightB && rightA > leftB;
+      const verticalOverlap = topA < bottomB && bottomA > topB;
+      return horizontalOverlap && verticalOverlap;
+    });
+  }
+
   checkGameOver() {
     if (this.incorrect >= GameSettings.maxWrongAnswers) {
       return true;
     }
-    return this.questions.some((question) => question.y + question.height >= this.ui.canvas.height - 6);
+    return this.questions.some((question) => question.y + question.height >= (this.ui.canvasHeight || this.ui.canvas.clientHeight) - Math.round(6 * (this.ui.canvasScale || 1)));
   }
 
   endGame() {
@@ -448,6 +474,9 @@ class UIManager {
     this.selectedYear = 3;
     this.menuYearLabel.textContent = 'Year 3';
     this.authSecret = ['rain','bow','8','star'].join('');
+    this.canvasWidth = 760;
+    this.canvasHeight = 500;
+    this.canvasScale = 1;
     this.initControls();
     this.updateScoreboard();
   }
@@ -487,6 +516,23 @@ class UIManager {
     this.loadSettingsForm();
   }
 
+  resizeCanvas() {
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const visibleWidth = rect.width || this.canvas.clientWidth || this.canvas.offsetWidth || 760;
+    const visibleHeight = rect.height || this.canvas.clientHeight || this.canvas.offsetHeight || Math.round(visibleWidth * (500 / 760));
+    this.canvasWidth = visibleWidth;
+    this.canvasHeight = visibleHeight;
+    this.canvasScale = Math.max(0.8, Math.min(1.6, this.canvasWidth / 760));
+    const width = Math.round(visibleWidth * dpr);
+    const height = Math.round(visibleHeight * dpr);
+    if (this.canvas.width !== width || this.canvas.height !== height) {
+      this.canvas.width = width;
+      this.canvas.height = height;
+    }
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
   tryUnlock() {
     const value = this.authInput.value.trim();
     if (!value) {
@@ -501,6 +547,7 @@ class UIManager {
   }
 
   onStart() {
+    this.resizeCanvas();
     this.game.start(this.selectedYear || 2);
     this.renderChoices();
   }
@@ -617,43 +664,46 @@ class UIManager {
   render(game) {
     if (!game) return;
     const ctx = this.ctx;
-    const canvas = this.canvas;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const canvasWidth = this.canvasWidth;
+    const canvasHeight = this.canvasHeight;
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.fillStyle = '#091624';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     const active = game.questions[0];
     game.questions.forEach((question, index) => {
       const isActive = question === active;
-      const padding = isActive ? GameSettings.highlightPadding + 10 : 18;
-      const width = Math.round(ctx.measureText(question.text).width + padding * 2 + 14);
-      question.width = width;
-      const x = Math.max(10, Math.min(question.x, canvas.width - width - 10));
+      const scale = this.canvasScale || 1;
+      const padding = Math.round((isActive ? GameSettings.highlightPadding + 10 : 18) * scale);
+      const fontSize = Math.max(18, Math.round((isActive ? 32 : 24) * scale));
+      ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+      const boxWidth = Math.round(ctx.measureText(question.text).width + padding * 2 + 14);
+      question.width = boxWidth;
+      const x = Math.max(Math.round(10 * scale), Math.min(question.x, canvasWidth - boxWidth - Math.round(10 * scale)));
       question.x = x;
       const y = question.y;
 
       if (isActive) {
         ctx.fillStyle = 'rgba(80, 216, 255, 0.16)';
         ctx.strokeStyle = 'rgba(80, 216, 255, 0.95)';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = Math.max(2, Math.round(4 * scale));
         ctx.shadowColor = 'rgba(80, 216, 255, 0.6)';
-        ctx.shadowBlur = 18;
+        ctx.shadowBlur = Math.round(18 * scale);
       } else {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = Math.max(1, Math.round(2 * scale));
         ctx.shadowBlur = 0;
       }
 
       ctx.beginPath();
-      ctx.roundRect(x, y, width, question.height, 14);
+      ctx.roundRect(x, y, boxWidth, question.height, Math.round(14 * scale));
       ctx.fill();
       ctx.stroke();
       ctx.shadowBlur = 0;
 
       ctx.fillStyle = isActive ? '#e9fbff' : '#dfe7ff';
-      ctx.font = isActive ? 'bold 32px Inter, sans-serif' : '24px Inter, sans-serif';
-      ctx.fillText(question.text, x + padding, y + 54);
+      ctx.fillText(question.text, x + padding, y + Math.round(54 * scale));
     });
 
     game.explosions.forEach((explosion) => {
@@ -685,4 +735,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const game = new Game(ui);
   ui.setGame(game);
   ui.showScreen('auth-screen');
+  ui.resizeCanvas();
+  window.addEventListener('resize', () => ui.resizeCanvas());
 });
