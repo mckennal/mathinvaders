@@ -81,6 +81,7 @@ textarea {
   border-radius: 12px;
   padding: 32px;
   box-shadow: var(--shadow-md);
+  width: 100%;
 }
 
 .panel h2 {
@@ -182,11 +183,6 @@ button.secondary {
 button.secondary:hover {
   background: var(--bg-tertiary);
 }
-
-button + button {
-  margin-left: 12px;
-}
-
 .panel > button,
 .panel > .year-grid,
 .panel > label,
@@ -227,17 +223,28 @@ button + button {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 24px;
+  margin-top: 16px;
+  margin-left: 32px;
+  margin-right: 32px;
   color: var(--text-secondary);
   font-size: 0.95rem;
+  width: auto;
 }
 
 .footer-info div {
+  flex: 1;
   background: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
   border-radius: 8px;
   padding: 12px 16px;
 }
+
+#menu-screen > .panel,
+#menu-screen > .footer-info {
+  max-width: 100%;
+}
+
+
 
 .game-topbar {
   display: grid;
@@ -384,6 +391,20 @@ button + button {
   }
 }
 
+.version-badge {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: 8px;
+  padding: 6px 12px;
+  box-shadow: var(--shadow-sm);
+}
+
 @media (max-width: 560px) {
   body {
     padding: 12px;
@@ -396,5 +417,11 @@ button + button {
   }
   .app-header {
     margin-bottom: 24px;
+  }
+  .version-badge {
+    bottom: 12px;
+    right: 12px;
+    font-size: 0.8rem;
+    padding: 5px 10px;
   }
 }
