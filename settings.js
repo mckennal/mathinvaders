@@ -13,4 +13,5 @@ window.GameSettings = {
   laserDuration: 220,
   laserColor: '#7af2ff',
   localStorageKey: 'math-invaders-high-score',
+  version: 'v0.31',
 };

@@ -736,5 +736,14 @@ window.addEventListener('DOMContentLoaded', () => {
   ui.setGame(game);
   ui.showScreen('auth-screen');
   ui.resizeCanvas();
+  // populate version badge from GameSettings if present
+  try {
+    const badge = document.getElementById('version-badge');
+    if (badge && window.GameSettings && GameSettings.version) {
+      badge.textContent = GameSettings.version;
+    }
+  } catch (e) {
+    // ignore
+  }
   window.addEventListener('resize', () => ui.resizeCanvas());
 });
